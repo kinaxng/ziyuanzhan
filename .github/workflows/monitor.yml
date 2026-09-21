@@ -12,6 +12,8 @@ on:
       - 'monitor.py'
       - 'requirements.txt'
       - 'docs/data/sources.json'
+      - 'scripts/convert_to_decotv.py'
+      - '.github/workflows/monitor.yml'
 
 permissions:
   contents: write
@@ -41,6 +43,10 @@ jobs:
       - name: Run monitor script
         run: |
           python monitor.py
+
+      - name: Convert to DecoTV config
+        run: |
+          python scripts/convert_to_decotv.py
 
       - name: Clean old history files
         run: |
