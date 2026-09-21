@@ -1,0 +1,62 @@
+name: Generate and Deploy
+
+on:
+  schedule:
+    # 每6小时运行一次（UTC时间）
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (upstream mirror)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml pypinyin
+
+      - name: Run monitor
+        run: |
+          cd main
+          python monitor.py
+
+      - name: Convert to DecoTV config
+        run: |
+          python gh-pages/scripts/convert_to_decotv.py \
+            --input main/docs/data/latest.json \
+            --output main/docs/data/decotv.json
+
+      - name: Clean old history files
+        run: |
+          cd main/docs/data
+          ls -t monitor_*.json 2>/dev/null | tail -n +6 | xargs rm -f 2>/dev/null || true
+
+      - name: Update gh-pages
+        run: |
+          rm -rf gh-pages/docs
+          cp -r main/docs gh-pages/docs
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --cached --quiet || git commit -m "📊 Update monitor data: $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
