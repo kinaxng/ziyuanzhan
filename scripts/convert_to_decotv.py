@@ -1,19 +1,7 @@
 #!/usr/bin/env python3
 """
 将 monitor.py 生成的 docs/data/latest.json 转换为 DecoTV 配置格式。
-
-输出格式示例:
-{
-  "cache_time": 7200,
-  "api_site": {
-    "ziyuan_9": {
-      "api": "https://jipinvip1.com/api.php/provide/vod/",
-      "name": "新极品资源站",
-      "detail": "https://jipinvip1.com"
-    }
-  },
-  "custom_category": []
-}
+默认输出 Base58 编码的 .b58 文件；可通过 --output 同时输出普通 JSON。
 """
 
 import argparse
@@ -23,8 +11,8 @@ import sys
 from urllib.parse import urlparse
 
 DEFAULT_INPUT = "docs/data/latest.json"
-DEFAULT_OUTPUT = "docs/data/decotv.json"
-DEFAULT_OUTPUT_B58 = ""
+DEFAULT_OUTPUT = ""
+DEFAULT_OUTPUT_B58 = "docs/data/decotv.b58"
 CACHE_TIME = 7200
 
 # Base58 字母表（与比特币地址相同）
@@ -137,7 +125,7 @@ def build_decotv_site(resource: dict, existing_keys: set) -> tuple[str, dict] | 
     }
 
 
-def convert(input_path: str, output_path: str, include_offline: bool) -> dict:
+def convert(input_path: str, include_offline: bool) -> dict:
     """读取 latest.json 并转换为 DecoTV 格式。"""
     try:
         with open(input_path, "r", encoding="utf-8") as f:
@@ -194,12 +182,12 @@ def main() -> int:
     parser.add_argument(
         "--output",
         default=DEFAULT_OUTPUT,
-        help=f"输出文件路径 (默认: {DEFAULT_OUTPUT})",
+        help="普通 JSON 输出文件路径（可选，默认不输出）",
     )
     parser.add_argument(
         "--output-b58",
         default=DEFAULT_OUTPUT_B58,
-        help="Base58 编码输出文件路径（可选）",
+        help=f"Base58 编码输出文件路径 (默认: {DEFAULT_OUTPUT_B58})",
     )
     parser.add_argument(
         "--include-offline",
@@ -209,23 +197,27 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    if not args.output and not args.output_b58:
+        error("至少需要指定 --output 或 --output-b58 之一")
+        return 1
+
     try:
-        output = convert(args.input, args.output, args.include_offline)
+        output = convert(args.input, args.include_offline)
     except Exception:
         return 1
 
-    try:
-        import os
-        os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
-        with open(args.output, "w", encoding="utf-8") as f:
-            json.dump(output, f, ensure_ascii=False, indent=2)
-            f.write("\n")
-    except Exception as e:
-        error(f"写入输出文件失败: {e}")
-        return 1
+    import os
 
-    print(f"[INFO] DecoTV 配置已生成: {args.output}")
-    print(f"[INFO] 共 {len(output['api_site'])} 个站点")
+    if args.output:
+        try:
+            os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+            with open(args.output, "w", encoding="utf-8") as f:
+                json.dump(output, f, ensure_ascii=False, indent=2)
+                f.write("\n")
+            print(f"[INFO] DecoTV 配置已生成: {args.output}")
+        except Exception as e:
+            error(f"写入输出文件失败: {e}")
+            return 1
 
     if args.output_b58:
         try:
@@ -235,11 +227,12 @@ def main() -> int:
             with open(args.output_b58, "w", encoding="utf-8") as f:
                 f.write(base58_encode(json_bytes))
                 f.write("\n")
+            print(f"[INFO] Base58 配置已生成: {args.output_b58}")
         except Exception as e:
             error(f"写入 Base58 输出文件失败: {e}")
             return 1
-        print(f"[INFO] Base58 配置已生成: {args.output_b58}")
 
+    print(f"[INFO] 共 {len(output['api_site'])} 个站点")
     return 0
 
 
