@@ -24,11 +24,28 @@ from urllib.parse import urlparse
 
 DEFAULT_INPUT = "docs/data/latest.json"
 DEFAULT_OUTPUT = "docs/data/decotv.json"
+DEFAULT_OUTPUT_B58 = ""
 CACHE_TIME = 7200
+
+# Base58 字母表（与比特币地址相同）
+BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
 
 def error(message: str) -> None:
     print(f"[ERROR] {message}", file=sys.stderr)
+
+
+def base58_encode(data: bytes) -> str:
+    """将字节数据进行 Base58 编码。"""
+    num = int.from_bytes(data, "big")
+    if num == 0:
+        return BASE58_ALPHABET[0]
+    encoded = []
+    while num > 0:
+        num, rem = divmod(num, 58)
+        encoded.append(BASE58_ALPHABET[rem])
+    leading = len(data) - len(data.lstrip(b"\x00"))
+    return "1" * leading + "".join(reversed(encoded))
 
 
 def is_valid_api(url: str) -> bool:
@@ -180,6 +197,11 @@ def main() -> int:
         help=f"输出文件路径 (默认: {DEFAULT_OUTPUT})",
     )
     parser.add_argument(
+        "--output-b58",
+        default=DEFAULT_OUTPUT_B58,
+        help="Base58 编码输出文件路径（可选）",
+    )
+    parser.add_argument(
         "--include-offline",
         action="store_true",
         help="保留离线站点（默认只保留在线站点）",
@@ -204,9 +226,22 @@ def main() -> int:
 
     print(f"[INFO] DecoTV 配置已生成: {args.output}")
     print(f"[INFO] 共 {len(output['api_site'])} 个站点")
+
+    if args.output_b58:
+        try:
+            os.makedirs(os.path.dirname(args.output_b58) or ".", exist_ok=True)
+            # 使用紧凑 JSON 减小 Base58 编码后体积
+            json_bytes = json.dumps(output, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+            with open(args.output_b58, "w", encoding="utf-8") as f:
+                f.write(base58_encode(json_bytes))
+                f.write("\n")
+        except Exception as e:
+            error(f"写入 Base58 输出文件失败: {e}")
+            return 1
+        print(f"[INFO] Base58 配置已生成: {args.output_b58}")
+
     return 0
 
 
 if __name__ == "__main__":
     sys.exit(main())
-
