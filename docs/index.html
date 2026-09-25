@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资源站监测 - www.ziyuanzu.com 资源站实时监控</title>
+<meta name="description" content="www.ziyuanzu.com 资源站实时监测面板，共监测0个资源站，在线0个，离线0个。更新时间：2026-09-25 04:24:19">
+<meta name="keywords" content="资源组, ziyuanzu, 影视资源站, 采集站监测, 资源站监控, 播放源检测">
+<style>
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --surface2: #334155;
+    --ink: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; --accent2: #818cf8;
+    --success: #4ade80; --danger: #f87171; --warning: #fbbf24;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; min-height: 100vh; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+  header { text-align: center; padding: 2rem 1rem; border-bottom: 1px solid var(--surface2); margin-bottom: 2rem; }
+  header h1 { font-size: 2rem; font-weight: 800; color: var(--accent); margin-bottom: 0.5rem; }
+  header .subtitle { color: var(--muted); font-size: 1rem; }
+  header .update-time { color: var(--muted); font-size: 0.85rem; margin-top: 0.5rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border-radius: 12px; padding: 1.5rem; text-align: center; border: 1px solid var(--surface2); transition: transform 0.2s; }
+  .stat-card:hover { transform: translateY(-4px); }
+  .stat-card .number { font-size: 2rem; font-weight: 800; }
+  .stat-card .label { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  .stat-card.total .number { color: var(--accent); }
+  .stat-card.online .number { color: var(--success); }
+  .stat-card.offline .number { color: var(--danger); }
+  .stat-card.rate .number { color: var(--warning); }
+  .section-title { font-size: 1.3rem; font-weight: 700; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+  .resource-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: var(--surface); border-radius: 12px; overflow: hidden; }
+  .resource-table thead { background: var(--surface2); }
+  .resource-table th, .resource-table td { padding: 0.85rem 1rem; text-align: left; }
+  .resource-table th { font-weight: 600; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .resource-table tbody tr { border-bottom: 1px solid var(--surface2); transition: background 0.15s; }
+  .resource-table tbody tr:hover { background: rgba(56,189,248,0.05); }
+  .resource-table tbody tr:last-child { border-bottom: none; }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge-online { background: rgba(74,222,128,0.15); color: var(--success); }
+  .badge-offline { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .badge-unknown { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .resource-name { font-weight: 600; color: var(--accent); text-decoration: none; }
+  .resource-name:hover { text-decoration: underline; }
+  .resource-desc { color: var(--muted); font-size: 0.8rem; }
+  .response-fast { color: var(--success); }
+  .response-slow { color: var(--warning); }
+  .response-timeout { color: var(--danger); }
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--surface2); margin-top: 3rem; }
+  .footer a { color: var(--accent); text-decoration: none; }
+  @media (max-width: 768px) { .resource-table { font-size: 0.8rem; } .resource-table th, .resource-table td { padding: 0.6rem 0.5rem; } .resource-desc { display: none; } header h1 { font-size: 1.5rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <h1>资源站监测</h1>
+  <p class="subtitle"><a href="https://www.ziyuanzu.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted;">www.ziyuanzu.com</a> 资源站实时监控面板</p>
+  <p class="update-time">更新时间：2026-09-25 04:24:19</p>
+</header>
+<div class="stats-grid">
+  <div class="stat-card total"><div class="number">0</div><div class="label">监测资源站</div></div>
+  <div class="stat-card online"><div class="number">0</div><div class="label">在线站点</div></div>
+  <div class="stat-card offline"><div class="number">0</div><div class="label">离线站点</div></div>
+  <div class="stat-card rate"><div class="number">0%</div><div class="label">在线率</div></div>
+</div>
+<h2 class="section-title">资源站状态列表</h2>
+<table class="resource-table">
+  <thead><tr><th>#</th><th>资源站名称</th><th>描述</th><th>状态</th><th>HTTP状态</th><th>响应时间</th><th>可用率</th></tr></thead>
+  <tbody>
+
+  </tbody>
+</table>
+<div class="footer">
+  <p>数据来源：<a href="https://www.ziyuanzu.com/" target="_blank" rel="noopener">www.ziyuanzu.com</a> | 监测脚本自动运行</p>
+  <p style="margin-top:0.5rem;">本项目为第三方监测工具，与 www.ziyuanzu.com 官方无关</p>
+</div>
+</div>
+</body>
+</html>
